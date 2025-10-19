@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  # 1. SERVICIO DE LA BASE DE DATOS POSTGRESQL
+  postgres:
+    image: postgres:14-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: rickandmortydb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    # Mapeo crucial: Usa el puerto 5432 del host
+    ports:
+      - "5432:5432" 
+
+  # 2. SERVICIO DE LA BASE DE DATOS MYSQL (para Sequelize)
+  mysql:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: rickandmortydb
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    volumes:
+      - mysql_data:/var/lib/mysql
+    # Mapeo crucial: Usa el puerto 3306 del host
+    ports:
+      - "3306:3306" 
+
+  # 3. SERVICIO DE CACHÉ REDIS
+  redis:
+    image: redis:7-alpine
+    restart: always
+    # Mapeo crucial: Usa el puerto 6379 del host
+    ports:
+      - "6379:6379" 
+    volumes:
+      - redis_data:/data
+
+# Definición de volúmenes para persistencia de datos
+volumes:
+  postgres_data:
+  mysql_data:
+  redis_data:
