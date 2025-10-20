@@ -1,11 +1,10 @@
 import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Index } from 'sequelize-typescript';
 import { Species } from '../../species/entities/species.model'; 
 import { Origin } from '../../origins/entities/origin.model';   
-import { Field } from '@nestjs/graphql';
 
 // Definición de los ENUM (tipos de datos de cadena limitada)
-const StatusEnum = ['Alive', 'Dead', 'Unknown'] as const;
-const GenderEnum = ['Female', 'Male', 'Genderless', 'Unknown'] as const;
+export const StatusEnum = ['Alive', 'Dead', 'Unknown'] as const;
+export const GenderEnum = ['Female', 'Male', 'Genderless', 'Unknown'] as const;
 
 @Table({
   tableName: 'Characters',
@@ -14,7 +13,6 @@ const GenderEnum = ['Female', 'Male', 'Genderless', 'Unknown'] as const;
 export class Character extends Model {
   
   @Index
-  @Field()
   @Column({
     type: DataType.STRING(255),
     allowNull: false,
@@ -46,7 +44,6 @@ export class Character extends Model {
   
   // 1. Clave Foránea a la tabla Species
   @ForeignKey(() => Species)
-  @Field()
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
@@ -60,7 +57,6 @@ export class Character extends Model {
 
   // 1. Clave Foránea a la tabla Origin
   @ForeignKey(() => Origin)
-  @Field()
   @Column({
     type: DataType.INTEGER,
     allowNull: false,

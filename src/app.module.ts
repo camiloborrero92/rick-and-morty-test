@@ -10,6 +10,8 @@ import { OriginsModule } from './origins/origins.module';
 import { SpeciesModule } from './species/species.module';
 import { CharactersModule } from './characters/characters.module';
 import { TestGrapModule } from './test-grap/test-grap.module';
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggerInterceptor } from './interceptors/logger.interceptor';
 
 
 
@@ -48,6 +50,9 @@ import { TestGrapModule } from './test-grap/test-grap.module';
     OriginsModule, SpeciesModule, CharactersModule, TestGrapModule,
   ],
   controllers: [],
-  providers: [], 
+  providers: [{
+      provide: APP_INTERCEPTOR, // task - middleware
+      useClass: LoggerInterceptor,
+    },], 
 })
 export class AppModule {}

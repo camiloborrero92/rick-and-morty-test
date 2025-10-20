@@ -6,8 +6,6 @@ import { Species } from '../species/entities/species.model';
 import { Origin } from '../origins/entities/origin.model';
 import { InjectModel } from '@nestjs/sequelize';
 import { Cron } from '@nestjs/schedule';
-import { CharacterFilterInput } from './dto/character-filter.input';
-import { Op } from 'sequelize';
 
 @Injectable()
 export class CharactersService {
@@ -22,7 +20,7 @@ export class CharactersService {
   ) { }
 
   // Execute every 12 hours
-  @Cron('* */12 * * *', {
+  @Cron('0 0,12 * * *', {
     name: 'characters-sync',
     timeZone: 'America/Bogota',
   })
@@ -39,8 +37,20 @@ export class CharactersService {
       let url = 'https://rickandmortyapi.com/api/character';
       let totalSynced = 0;
 
+      // Configure axios with better defaults
+      const axiosConfig = {
+        timeout: 15000, // 15 seconds
+        headers: {
+          'User-Agent': 'NestJS-App/1.0',
+          'Accept': 'application/json',
+          'Connection': 'keep-alive'
+        },
+        maxRedirects: 5,
+        validateStatus: (status: number) => status < 500, // Don't throw on 4xx errors
+      };
+
       while (url) {
-        const response = await axios.get<RickAndMortyResponse>(url);
+        const response = await axios.get<RickAndMortyResponse>(url, axiosConfig);
         const { results, info } = response.data;
 
         for (const character of results) {
@@ -90,44 +100,5 @@ export class CharactersService {
       console.error('Sync error details:', error);
       throw new Error(`Error syncing characters: ${error.message}`);
     }
-  }
-
-async filterCharacters(filter: CharacterFilterInput = {}): Promise<Character[]> {
-    const whereCondition: any = {};
-    const include: any[] = [];
-    
-    // 1. Filtrado por Campos Directos (Status, Gender)
-    if (filter.status) {
-      whereCondition.status = filter.status;
-    }
-    if (filter.gender) {
-      whereCondition.gender = filter.gender;
-    }
-
-    // 2. Filtrado por Nombre (Búsqueda parcial LIKE)
-    if (filter.name) {
-      whereCondition.name = {
-        [Op.like]: `%${filter.name}%`, // Sequelize syntax for LIKE '%name%'
-      };
-    }
-
-    // 3. Filtrado por Claves Foráneas (Species y Origin)
-    if (filter.speciesId) {
-      whereCondition.id_species = filter.speciesId;
-      include.push(Species); // Incluir la tabla para que Sequelize sepa unirse
-    }
-    if (filter.originId) {
-      whereCondition.id_origin = filter.originId;
-      include.push(Origin); // Incluir la tabla para la unión
-    }
-
-    // Ejecutar la consulta con filtros y asociaciones
-    return this.characterModel.findAll({
-      where: whereCondition,
-      include: [
-          Species, // Aseguramos que la especie y el origen se devuelvan en el objeto
-          Origin,
-      ], 
-    });
   }
 }

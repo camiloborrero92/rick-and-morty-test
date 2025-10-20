@@ -1,0 +1,29 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreateTestGrapInput {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+type Mutation {
+  createTestGrap(createTestGrapInput: CreateTestGrapInput!): TestGrap!
+  removeTestGrap(id: Int!): TestGrap!
+  updateTestGrap(updateTestGrapInput: UpdateTestGrapInput!): TestGrap!
+}
+
+type Query {
+  testGrap(id: Int!): TestGrap!
+}
+
+type TestGrap {
+  """Example field (placeholder)"""
+  exampleField: Int!
+}
+
+input UpdateTestGrapInput {
+  """Example field (placeholder)"""
+  exampleField: Int
+  id: Int!
+}
