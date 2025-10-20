@@ -1,34 +1,37 @@
-# Rick and Morty API Test
+# Rick and Morty GraphQL API
 
-A GraphQL API built with NestJS and TypeScript that provides access to Rick and Morty universe data including characters, species, and origins.
+A robust GraphQL API built with NestJS and TypeScript that provides comprehensive access to Rick and Morty universe data, including characters, species, and origins with full relationship mapping.
 
-## Description
+## 🚀 Features
 
-This project is built using the [NestJS](https://github.com/nestjs/nest) framework with GraphQL support, featuring a complete API for Rick and Morty data with PostgreSQL, MySQL, and Redis integration.
+- **GraphQL API** with Apollo Server integration
+- **Complete Rick and Morty data model** (Characters, Species, Origins)
+- **Database relationships** with Sequelize ORM
+- **PostgreSQL** as primary database
+- **Docker containerization** for easy deployment
+- **Hot reload** development environment
+- **Comprehensive logging** and error handling
+- **Type-safe** development with TypeScript
 
-## Prerequisites
+## 📋 Prerequisites
 
-Before running this project, make sure you have the following tools installed on your system:
+Ensure you have the following installed:
 
-- **Docker** (v20.0 or higher) - [Install Docker](https://docs.docker.com/get-docker/)
-- **Docker Compose** (v2.0 or higher) - Usually comes with Docker Desktop
-- **Node.js** (v18.0 or higher) - [Install Node.js](https://nodejs.org/)
-- **Yarn** (v1.22 or higher) - [Install Yarn](https://yarnpkg.com/getting-started/install)
+- **Docker** (v20.0+) - [Install Docker](https://docs.docker.com/get-docker/)
+- **Docker Compose** (v2.0+) - Usually included with Docker Desktop
+- **Node.js** (v18.0+) - [Install Node.js](https://nodejs.org/)
+- **npm** or **yarn** - Package manager
 
 ### Verify Installation
-
-You can verify that the tools are properly installed by running:
 
 ```bash
 docker --version
 docker-compose --version
 node --version
-yarn --version
+npm --version
 ```
 
-## Getting Started
-
-Follow these steps to set up and run the project for the first time:
+## 🛠️ Getting Started
 
 ### 1. Clone the Repository
 
@@ -37,43 +40,35 @@ git clone https://github.com/camiloborrero92/rick-and-morty-test.git
 cd rick-and-morty-test
 ```
 
-### 2. Environment Configuration
+### 2. Environment Setup
 
-Copy the example environment file and configure your environment variables:
+The project uses Docker for database services. The default configuration should work out of the box.
 
-```bash
-cp .env.example .env
-```
+### 3. Start Database Services
 
-Edit the `.env` file with your preferred settings. The default values should work for local development.
-
-### 3. Start the Database Services
-
-Start the required services (PostgreSQL, MySQL, and Redis) using Docker Compose:
+Launch PostgreSQL using Docker Compose:
 
 ```bash
 docker-compose up -d
 ```
 
-This will start:
-- PostgreSQL database on port 5432
-- MySQL database on port 3306  
-- Redis cache on port 6379
+This starts:
+- **PostgreSQL** database on port 5432
 
 ### 4. Install Dependencies
 
-Install the project dependencies using Yarn:
-
 ```bash
+npm install
+# or
 yarn install
 ```
 
 ### 5. Run the Application
 
-Start the development server:
-
 ```bash
-# Development mode (with hot reload)
+# Development mode with hot reload
+npm run start:dev
+# or
 yarn start:dev
 ```
 
@@ -81,53 +76,106 @@ The application will be available at:
 - **API**: http://localhost:3000
 - **GraphQL Playground**: http://localhost:3000/graphql
 
-## Available Scripts
+## 📚 GraphQL API Documentation
+
+### Available Queries
+
+#### Get All Characters
+```graphql
+query GetAllCharacters {
+  allCharacters {
+    id
+    name
+    status
+    gender
+    image_url
+    species {
+      id
+      name
+    }
+    origin {
+      id
+      name
+      url
+    }
+  }
+}
+```
+
+#### Test Database Connection
+```graphql
+query TestConnection {
+  testConnection
+}
+```
+
+### Data Models
+
+#### Character
+- `id`: Unique identifier
+- `name`: Character name
+- `status`: Alive, Dead, or Unknown
+- `gender`: Male, Female, Genderless, or Unknown
+- `image_url`: Character image URL
+- `species`: Related species information
+- `origin`: Related origin information
+
+#### Species
+- `id`: Unique identifier
+- `name`: Species name
+
+#### Origin
+- `id`: Unique identifier
+- `name`: Origin name
+- `url`: Origin URL from Rick and Morty API
+
+## 📜 Available Scripts
 
 ### Development Commands
 
 ```bash
 # Start in development mode (with hot reload)
-yarn start:dev
+npm run start:dev
 
 # Start in debug mode
-yarn start:debug
+npm run start:debug
 
 # Build the project
-yarn build
+npm run build
 
 # Start in production mode (requires build first)
-yarn start:prod
+npm run start:prod
 ```
 
 ### Testing Commands
 
 ```bash
 # Run unit tests
-yarn test
+npm run test
 
 # Run tests in watch mode
-yarn test:watch
+npm run test:watch
 
 # Run end-to-end tests
-yarn test:e2e
+npm run test:e2e
 
 # Generate test coverage report
-yarn test:cov
+npm run test:cov
 ```
 
 ### Code Quality Commands
 
 ```bash
 # Lint and fix code issues
-yarn lint
+npm run lint
 
 # Format code with Prettier
-yarn format
+npm run format
 ```
 
-## Docker Commands
+## 🐳 Docker Commands
 
-### Start Services
+### Managing Services
 
 ```bash
 # Start all services in background
@@ -136,132 +184,269 @@ docker-compose up -d
 # Start services and view logs
 docker-compose up
 
-# Start specific service
-docker-compose up -d postgres
-```
-
-### Stop Services
-
-```bash
 # Stop all services
 docker-compose down
 
-# Stop services and remove volumes (⚠️ This will delete all data)
+# Stop services and remove volumes (⚠️ Deletes all data)
 docker-compose down -v
 ```
 
-### View Logs
+### Viewing Logs
 
 ```bash
 # View logs of all services
 docker-compose logs
 
-# View logs of specific service
+# View PostgreSQL logs
 docker-compose logs postgres
 
 # Follow logs in real-time
 docker-compose logs -f
 ```
 
-## Project Structure
+## 🏗️ Project Structure
 
 ```
 src/
-├── app.module.ts           # Main application module
-├── main.ts                 # Application entry point
-├── characters/             # Characters module
-│   ├── characters.controller.ts
-│   ├── characters.resolver.ts
-│   ├── characters.service.ts
-│   └── dto/
-├── origins/                # Origins module
-├── species/                # Species module
-├── config/                 # Configuration module
-└── interceptors/           # Custom interceptors
+├── app.module.ts                    # Main application module
+├── main.ts                         # Application entry point
+├── characters/                     # Characters domain
+│   ├── characters.controller.ts    # REST controller
+│   ├── characters.resolver.ts      # GraphQL resolver
+│   ├── characters.service.ts       # Business logic
+│   ├── characters.module.ts        # Module configuration
+│   ├── dto/
+│   │   └── character.type.ts       # GraphQL type definitions
+│   ├── entities/
+│   │   └── character.model.ts      # Sequelize model
+│   └── interfaces/
+│       └── response-api.interface.ts
+├── origins/                        # Origins domain
+│   ├── origins.service.ts
+│   ├── origins.module.ts
+│   ├── dto/
+│   │   └── origin.type.ts
+│   └── entities/
+│       └── origin.model.ts
+├── species/                        # Species domain
+│   ├── species.service.ts
+│   ├── species.module.ts
+│   ├── dto/
+│   │   └── species.type.ts
+│   └── entities/
+│       └── species.model.ts
+├── config/                         # Configuration management
+│   ├── config.interface.ts
+│   ├── config.module.ts
+│   ├── config.service.ts
+│   └── validation.schema.ts
+├── interceptors/                   # Custom interceptors
+│   └── logger.interceptor.ts
+└── test-grap/                     # Test GraphQL module
+    ├── test-grap.resolver.ts
+    ├── test-grap.service.ts
+    ├── test-grap.module.ts
+    ├── dto/
+    └── entities/
 ```
 
-## GraphQL API
+## 🔧 Architecture
 
-Once the application is running, you can access the GraphQL playground at `http://localhost:3000/graphql` to explore the available queries and mutations.
+The project follows **Domain-Driven Design (DDD)** principles with clear separation of concerns:
 
-### Example Queries
+- **Controllers**: Handle HTTP requests (REST endpoints)
+- **Resolvers**: Handle GraphQL queries and mutations
+- **Services**: Contain business logic and data processing
+- **Models**: Define database schema and relationships
+- **DTOs**: Define GraphQL types and API contracts
+- **Modules**: Organize related functionality
 
-```graphql
-# Get all characters
-query {
-  characters {
-    id
-    name
-    status
-    species
-    origin {
-      name
-    }
+### Database Relationships
+
+```sql
+Characters
+├── belongs_to Species (via id_species)
+└── belongs_to Origin (via id_origin)
+```
+
+## 🔍 Example Usage
+
+### Using GraphQL Playground
+
+1. Navigate to http://localhost:3000/graphql
+2. Use the built-in documentation explorer
+3. Try the example queries provided above
+
+### Sample Character Response
+
+```json
+{
+  "data": {
+    "allCharacters": [
+      {
+        "id": "1",
+        "name": "Rick Sanchez",
+        "status": "Alive",
+        "gender": "Male",
+        "image_url": "https://rickandmortyapi.com/api/character/avatar/1.jpeg",
+        "species": {
+          "id": "1",
+          "name": "Human"
+        },
+        "origin": {
+          "id": "1",
+          "name": "Earth (C-137)",
+          "url": "https://rickandmortyapi.com/api/location/1"
+        }
+      }
+    ]
   }
 }
 ```
 
-## Troubleshooting
+## 🚨 Troubleshooting
 
 ### Common Issues
 
-1. **Port already in use**: Make sure ports 3000, 3306, 5432, and 6379 are not being used by other applications
-2. **Docker services not starting**: Run `docker-compose down` and then `docker-compose up -d` again
-3. **Dependencies issues**: Delete `node_modules` and `yarn.lock`, then run `yarn install` again
+#### Port Already in Use
+```bash
+# Check what's using port 3000
+lsof -i :3000
 
-### Reset Everything
+# Kill the process
+kill -9 <PID>
+```
 
-If you encounter persistent issues, you can reset the entire setup:
+#### Database Connection Issues
+```bash
+# Reset database containers
+docker-compose down
+docker-compose up -d
+
+# Check database logs
+docker-compose logs postgres
+```
+
+#### GraphQL Schema Issues
+```bash
+# The schema.gql file is auto-generated
+# If you see schema errors, restart the development server
+npm run start:dev
+```
+
+#### Dependencies Issues
+```bash
+# Clean install
+rm -rf node_modules package-lock.json
+npm install
+```
+
+### Complete Reset
+
+If you encounter persistent issues:
 
 ```bash
-# Stop and remove all containers and volumes
+# 1. Stop all services and remove volumes
 docker-compose down -v
 
-# Remove node modules
-rm -rf node_modules yarn.lock
+# 2. Clean dependencies
+rm -rf node_modules package-lock.json
 
-# Reinstall dependencies
-yarn install
+# 3. Reinstall
+npm install
 
-# Start fresh
+# 4. Start fresh
 docker-compose up -d
-yarn start:dev
+npm run start:dev
 ```
 
-## Environment Variables
+### Debugging Tips
 
-The following environment variables can be configured in your `.env` file:
+1. **Check application logs** for detailed error messages
+2. **Use GraphQL Playground** to test queries interactively
+3. **Verify database connection** with the `testConnection` query
+4. **Check Docker container status** with `docker-compose ps`
+
+## ⚙️ Configuration
+
+### Environment Variables
+
+The application automatically configures itself for development. For production or custom setups, you can create a `.env` file:
 
 ```bash
-DB_HOST=localhost          # Database host
-DB_PORT=3306              # Database port
-DB_USER=root              # Database username
-DB_PASSWORD=password      # Database password
-DB_NAME=mydatabase        # Database name
-DB_SYNCHRONIZE=false      # Auto-sync database schema
-REDIS_HOST=localhost      # Redis host
-REDIS_PORT=6379          # Redis port
+# Database Configuration
+DB_HOST=localhost
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=password
+DB_NAME=rickandmorty
+DB_SYNCHRONIZE=true
+
+# Application Configuration
+PORT=3000
+NODE_ENV=development
 ```
 
-## Technologies Used
+### Database Schema
 
-- **NestJS** - Progressive Node.js framework
-- **GraphQL** - Query language for APIs
-- **TypeScript** - Typed JavaScript
-- **PostgreSQL** - Primary database
-- **MySQL** - Secondary database
-- **Redis** - Caching and session storage
-- **Docker** - Containerization
-- **Jest** - Testing framework
+The application uses Sequelize with auto-sync enabled in development mode. The schema includes:
 
-## Contributing
+- **Characters** table with foreign keys to Species and Origins
+- **Species** table with unique species names
+- **Origins** table with origin names and URLs
+- Automatic timestamps (createdAt, updatedAt)
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+## 🛠️ Technologies Used
 
-## License
+| Technology | Purpose | Version |
+|------------|---------|---------|
+| **NestJS** | Backend framework | ^10.0.0 |
+| **GraphQL** | API query language | ^16.8.0 |
+| **Apollo Server** | GraphQL server | ^4.9.0 |
+| **TypeScript** | Type safety | ^5.1.3 |
+| **Sequelize** | ORM for database | ^6.32.1 |
+| **PostgreSQL** | Primary database | 15 |
+| **Docker** | Containerization | - |
+| **Jest** | Testing framework | ^29.5.0 |
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+## 📈 Performance Considerations
+
+- **Database indexing** on frequently queried fields
+- **Lazy loading** of relationships to avoid N+1 problems
+- **Connection pooling** with Sequelize
+- **GraphQL query depth limiting** (built-in with Apollo)
+- **Logging interceptor** for monitoring API usage
+
+## 🤝 Contributing
+
+1. **Fork** the repository
+2. **Create** a feature branch (`git checkout -b feature/amazing-feature`)
+3. **Commit** your changes (`git commit -m 'Add amazing feature'`)
+4. **Push** to the branch (`git push origin feature/amazing-feature`)
+5. **Open** a Pull Request
+
+### Development Guidelines
+
+- Follow **TypeScript** best practices
+- Write **unit tests** for new features
+- Use **meaningful commit messages**
+- Update **documentation** for API changes
+- Follow **NestJS** conventions and patterns
+
+## 📄 License
+
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
+
+---
+
+## 📞 Support
+
+If you encounter any issues or have questions:
+
+1. Check the [Troubleshooting](#-troubleshooting) section
+2. Review the [Issues](https://github.com/camiloborrero92/rick-and-morty-test/issues) on GitHub
+3. Create a new issue with detailed information about your problem
+
+---
+
+**Built with ❤️ using NestJS and GraphQL**

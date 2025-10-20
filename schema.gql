@@ -30,7 +30,7 @@ type OriginType {
 }
 
 type Query {
-  allCharacters: [CharacterType!]!
+  allCharacters(gender: String, name: String, origin: String, species: String, status: String): [CharacterType!]!
   testGrap(id: Int!): TestGrap!
 }
 
