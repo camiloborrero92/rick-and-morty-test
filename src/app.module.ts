@@ -1,20 +1,23 @@
 import { Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
+import { ScheduleModule } from '@nestjs/schedule';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+
 import { AppConfigModule } from './config/config.module';
 import { AppConfigService } from './config/config.service';
 import { OriginsModule } from './origins/origins.module';
 import { SpeciesModule } from './species/species.module';
 import { CharactersModule } from './characters/characters.module';
-import { Character } from './characters/entities/character.model';
-import { Species } from './species/entities/species.model';
-import { Origin } from './origins/entities/origin.model';
+import { TestGrapModule } from './test-grap/test-grap.module';
+
 
 
 @Module({
   imports: [
 
     AppConfigModule, 
-
+    ScheduleModule.forRoot(),
     SequelizeModule.forRootAsync({
       
       useFactory: (appConfigService: AppConfigService) => {
@@ -36,7 +39,13 @@ import { Origin } from './origins/entities/origin.model';
         };
       },
       inject: [AppConfigService], 
-    }), OriginsModule, SpeciesModule, CharactersModule,
+    }), 
+    GraphQLModule.forRoot<ApolloDriverConfig>({
+      driver: ApolloDriver,
+      autoSchemaFile: 'schema.gql',
+      sortSchema: true,
+    }),
+    OriginsModule, SpeciesModule, CharactersModule, TestGrapModule,
   ],
   controllers: [],
   providers: [], 

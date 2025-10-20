@@ -1,11 +1,11 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, Index } from 'sequelize-typescript';
 
 @Table({
-  tableName: 'Species', // El nombre de la tabla en la base de datos
+  tableName: 'Species',
 })
 export class Species extends Model {
   
-  // Name of the species (ej: 'Human', 'Alien')
+  @Index
   @Column({
     type: DataType.STRING(100),
     allowNull: false,

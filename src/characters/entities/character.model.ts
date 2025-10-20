@@ -1,18 +1,20 @@
-import { Table, Column, Model, DataType, ForeignKey, BelongsTo } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, ForeignKey, BelongsTo, Index } from 'sequelize-typescript';
 import { Species } from '../../species/entities/species.model'; 
 import { Origin } from '../../origins/entities/origin.model';   
+import { Field } from '@nestjs/graphql';
 
 // Definición de los ENUM (tipos de datos de cadena limitada)
 const StatusEnum = ['Alive', 'Dead', 'Unknown'] as const;
 const GenderEnum = ['Female', 'Male', 'Genderless', 'Unknown'] as const;
 
 @Table({
-  tableName: 'Characters', // Nombre de la tabla en la DB
+  tableName: 'Characters',
   timestamps: true,
 })
 export class Character extends Model {
   
-  // Nombre
+  @Index
+  @Field()
   @Column({
     type: DataType.STRING(255),
     allowNull: false,
@@ -20,6 +22,7 @@ export class Character extends Model {
   name: string;
 
   // Estado (Status) - Usando los valores del ENUM
+  // @Field()
   @Column({
     type: DataType.ENUM(...StatusEnum),
     allowNull: false,
@@ -27,6 +30,7 @@ export class Character extends Model {
   status: typeof StatusEnum[number]; 
   
   // Género (Gender) - Usando los valores del ENUM
+  // @Field()
   @Column({
     type: DataType.ENUM(...GenderEnum),
     allowNull: false,
@@ -39,13 +43,10 @@ export class Character extends Model {
     allowNull: true, 
   })
   image_url: string;
-
-  // ----------------------------------------
-  // RELACIÓN CON SPECIES (Clave Foránea y Asociación)
-  // ----------------------------------------
   
   // 1. Clave Foránea a la tabla Species
   @ForeignKey(() => Species)
+  @Field()
   @Column({
     type: DataType.INTEGER,
     allowNull: false,
@@ -56,12 +57,10 @@ export class Character extends Model {
   @BelongsTo(() => Species)
   species: Species;
 
-  // ----------------------------------------
-  // RELACIÓN CON ORIGIN (Clave Foránea y Asociación)
-  // ----------------------------------------
 
   // 1. Clave Foránea a la tabla Origin
   @ForeignKey(() => Origin)
+  @Field()
   @Column({
     type: DataType.INTEGER,
     allowNull: false,

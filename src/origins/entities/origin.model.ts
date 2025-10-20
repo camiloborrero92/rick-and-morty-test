@@ -1,11 +1,11 @@
-import { Table, Column, Model, DataType } from 'sequelize-typescript';
+import { Table, Column, Model, DataType, Index } from 'sequelize-typescript';
 
 @Table({
   tableName: 'Origins',
 })
 export class Origin extends Model {
   
-  // Name of the origin (e.g., 'Earth (C-137)', 'Purge Planet')
+  @Index
   @Column({
     type: DataType.STRING(255),
     allowNull: false,
