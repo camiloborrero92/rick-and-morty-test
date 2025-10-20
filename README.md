@@ -80,10 +80,14 @@ The application will be available at:
 
 ### Available Queries
 
-#### Get All Characters
+#### Get Characters with Filters
 ```graphql
-query GetAllCharacters {
-  allCharacters {
+query GetCharacters {
+  findCharacters(
+    name: "Rick"
+    gender: "Male"
+    status: "Alive"
+  ) {
     id
     name
     status
@@ -102,12 +106,34 @@ query GetAllCharacters {
 }
 ```
 
-#### Test Database Connection
+#### Get All Characters (without filters)
 ```graphql
-query TestConnection {
-  testConnection
+query GetAllCharacters {
+  findCharacters {
+    id
+    name
+    status
+    gender
+    image_url
+    species {
+      id
+      name
+    }
+    origin {
+      id
+      name
+      url
+    }
+  }
 }
 ```
+
+#### Available Query Parameters
+- `name`: Filter by character name (partial match)
+- `gender`: Filter by gender (Male, Female, Genderless, Unknown)
+- `status`: Filter by status (Alive, Dead, Unknown)
+- `origin`: Filter by origin name (partial match)
+- `species`: Filter by species name (partial match)
 
 ### Data Models
 
@@ -364,7 +390,7 @@ npm run start:dev
 
 1. **Check application logs** for detailed error messages
 2. **Use GraphQL Playground** to test queries interactively
-3. **Verify database connection** with the `testConnection` query
+3. **Test basic queries** with the `findCharacters` query
 4. **Check Docker container status** with `docker-compose ps`
 
 ## ⚙️ Configuration

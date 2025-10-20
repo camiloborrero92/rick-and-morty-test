@@ -38,7 +38,7 @@ import { LoggerInterceptor } from './interceptors/logger.interceptor';
             force: false, 
             alter: dbConfig.synchronize 
           },
-          logging: console.log,
+          // logging: console.log,
         };
       },
       inject: [AppConfigService], 
