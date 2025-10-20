@@ -3,6 +3,7 @@ import { SequelizeModule } from '@nestjs/sequelize';
 import { ScheduleModule } from '@nestjs/schedule';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 
 import { AppConfigModule } from './config/config.module';
 import { AppConfigService } from './config/config.service';
@@ -46,6 +47,8 @@ import { LoggerInterceptor } from './interceptors/logger.interceptor';
       driver: ApolloDriver,
       autoSchemaFile: 'schema.gql',
       sortSchema: true,
+      playground: false,
+      plugins: [ApolloServerPluginLandingPageLocalDefault()],
     }),
     OriginsModule, SpeciesModule, CharactersModule, TestGrapModule,
   ],

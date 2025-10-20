@@ -2,6 +2,16 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type CharacterType {
+  gender: String!
+  id: ID!
+  image_url: String
+  name: String
+  origin: OriginType
+  species: SpeciesType
+  status: String!
+}
+
 input CreateTestGrapInput {
   """Example field (placeholder)"""
   exampleField: Int!
@@ -13,8 +23,20 @@ type Mutation {
   updateTestGrap(updateTestGrapInput: UpdateTestGrapInput!): TestGrap!
 }
 
+type OriginType {
+  id: ID!
+  name: String!
+  url: String
+}
+
 type Query {
+  allCharacters: [CharacterType!]!
   testGrap(id: Int!): TestGrap!
+}
+
+type SpeciesType {
+  id: ID!
+  name: String!
 }
 
 type TestGrap {

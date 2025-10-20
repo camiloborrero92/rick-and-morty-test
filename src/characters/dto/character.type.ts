@@ -13,10 +13,9 @@ export class CharacterType {
   @Field(() => ID)
   id: number;
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   name: string;
 
-  // Los ENUM se exponen como String en GraphQL
   @Field(() => String)
   status: typeof StatusEnum[number]; 
   
@@ -28,17 +27,11 @@ export class CharacterType {
   
   // 💡 RELACIÓN: Exponemos el objeto Species completo.
   // El Resolver se encarga de llenar este campo usando 'include'.
-  @Field(() => SpeciesType)
+  @Field(() => SpeciesType, { nullable: true })
   species: SpeciesType; 
 
   // 💡 RELACIÓN: Exponemos el objeto Origin completo.
-  @Field(() => OriginType)
+  @Field(() => OriginType, { nullable: true })
   origin: OriginType;
-  
-  // Opcional: Si quieres exponer las Claves Foráneas directamente
-  // @Field(() => ID)
-  // id_species: number;
-  
-  // @Field(() => ID)
-  // id_origin: number;
+
 }

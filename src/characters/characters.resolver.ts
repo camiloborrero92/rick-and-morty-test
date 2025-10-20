@@ -14,12 +14,23 @@ export class CharactersResolver {
 
   @Query(() => [CharacterType], { name: 'allCharacters' })
   async findAll(): Promise<Character[]> {
-
-    return this.characterModel.findAll({
-      include: [
-        { model: Species },
-        { model: Origin },
-      ],
-    });
+    try {
+      console.log('Fetching all characters...');
+      
+      // Ahora la consulta completa
+      const characters = await this.characterModel.findAll({
+        include: [
+          { model: Species, required: false },
+          { model: Origin, required: false },
+        ],
+        limit: 5,
+        raw: true
+      });
+      
+      return characters;
+    } catch (error) {
+      console.error('Error fetching characters:', error);
+      throw new Error('Failed to fetch characters');
+    }
   }
 }
