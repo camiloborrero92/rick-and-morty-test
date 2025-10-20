@@ -11,5 +11,6 @@ import { Origin } from '../origins/entities/origin.model';
   imports: [SequelizeModule.forFeature([Character, Species, Origin])],
   controllers: [CharactersController],
   providers: [CharactersService, CharactersResolver],
+  exports: [CharactersService],
 })
 export class CharactersModule {}

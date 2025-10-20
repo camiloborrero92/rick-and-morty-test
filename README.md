@@ -7,11 +7,12 @@ A robust GraphQL API built with NestJS and TypeScript that provides comprehensiv
 - **GraphQL API** with Apollo Server integration
 - **Complete Rick and Morty data model** (Characters, Species, Origins)
 - **Database relationships** with Sequelize ORM
-- **PostgreSQL** as primary database
+- **MySQL** as primary database (with PostgreSQL and Redis support)
 - **Docker containerization** for easy deployment
 - **Hot reload** development environment
 - **Comprehensive logging** and error handling
 - **Type-safe** development with TypeScript
+- **Automatic data synchronization** with Rick and Morty API
 
 ## 📋 Prerequisites
 
@@ -46,14 +47,16 @@ The project uses Docker for database services. The default configuration should 
 
 ### 3. Start Database Services
 
-Launch PostgreSQL using Docker Compose:
+Launch MySQL (primary), PostgreSQL, and Redis using Docker Compose:
 
 ```bash
 docker-compose up -d
 ```
 
 This starts:
-- **PostgreSQL** database on port 5432
+- **MySQL** database on port 3306 (primary database)
+- **PostgreSQL** database on port 5432 (optional)
+- **Redis** cache on port 6379
 
 ### 4. Install Dependencies
 
@@ -76,9 +79,76 @@ The application will be available at:
 - **API**: http://localhost:3000
 - **GraphQL Playground**: http://localhost:3000/graphql
 
+### 6. ⚠️ **IMPORTANT: Initial Data Population**
+
+**Before using the GraphQL API, you MUST populate the database with initial data.**
+
+Execute this POST request to load Rick and Morty characters data:
+
+```bash
+curl -X POST http://localhost:3000/characters
+```
+
+**Or using any HTTP client (Postman, Insomnia, etc.):**
+- **Method**: POST
+- **URL**: http://localhost:3000/characters
+- **Headers**: None required
+- **Body**: Empty
+
+This endpoint will:
+- Fetch 15 characters from the Rick and Morty API
+- Create associated species and origins
+- Populate your local database with relationships
+
+**⚠️ Without this step, your GraphQL queries will return empty results.**
+
 ## 📚 GraphQL API Documentation
 
-### Available Queries
+### GraphQL Schema Overview
+
+The API exposes the following GraphQL types and operations:
+
+#### Core Types
+
+```graphql
+type CharacterType {
+  id: ID!
+  name: String
+  status: String!      # "Alive", "Dead", "unknown"
+  gender: String!      # "Male", "Female", "Genderless", "unknown"
+  image_url: String    # Character avatar URL
+  species: SpeciesType # Related species information
+  origin: OriginType   # Related origin information
+}
+
+type SpeciesType {
+  id: ID!
+  name: String!        # Species name (e.g., "Human", "Alien")
+}
+
+type OriginType {
+  id: ID!
+  name: String!        # Origin name (e.g., "Earth (C-137)")
+  url: String          # Original Rick and Morty API URL
+}
+```
+
+#### Available Queries
+
+```graphql
+type Query {
+  # Main query to find characters with optional filters
+  findCharacters(
+    name: String      # Filter by character name (partial match)
+    status: String    # Filter by status: "Alive", "Dead", "unknown"
+    gender: String    # Filter by gender: "Male", "Female", "Genderless", "unknown"
+    species: String   # Filter by species name (partial match)
+    origin: String    # Filter by origin name (partial match)
+  ): [CharacterType!]!
+}
+```
+
+### Query Examples
 
 #### Get Characters with Filters
 ```graphql
@@ -129,31 +199,106 @@ query GetAllCharacters {
 ```
 
 #### Available Query Parameters
-- `name`: Filter by character name (partial match)
-- `gender`: Filter by gender (Male, Female, Genderless, Unknown)
-- `status`: Filter by status (Alive, Dead, Unknown)
-- `origin`: Filter by origin name (partial match)
-- `species`: Filter by species name (partial match)
+- `name`: Filter by character name (partial match, case-insensitive)
+- `gender`: Filter by gender ("Male", "Female", "Genderless", "unknown")
+- `status`: Filter by status ("Alive", "Dead", "unknown")
+- `origin`: Filter by origin name (partial match, case-insensitive)
+- `species`: Filter by species name (partial match, case-insensitive)
 
-### Data Models
+**Note**: All filters are optional and can be combined for more specific results.
 
-#### Character
-- `id`: Unique identifier
-- `name`: Character name
-- `status`: Alive, Dead, or Unknown
-- `gender`: Male, Female, Genderless, or Unknown
-- `image_url`: Character image URL
-- `species`: Related species information
-- `origin`: Related origin information
+### REST API Endpoints
 
-#### Species
-- `id`: Unique identifier
-- `name`: Species name
+#### Character Data Population
 
-#### Origin
-- `id`: Unique identifier
-- `name`: Origin name
-- `url`: Origin URL from Rick and Morty API
+```http
+POST /characters
+```
+
+**Purpose**: Populates the database with Rick and Morty character data.
+
+**Parameters**: None required
+
+**Response**: Synchronizes 15 characters with their associated species and origins.
+
+**Example Response**:
+```json
+{
+  "message": "Characters synchronized successfully",
+  "count": 15,
+  "status": "success"
+}
+```
+
+### Data Structure Details
+
+### Data Structure Details
+
+#### Database Schema
+
+The application uses the following database tables with Sequelize ORM:
+
+**Characters Table**:
+- `id`: Primary key (auto-increment)
+- `name`: Character name (string, nullable)
+- `status`: Character status (string, required)
+- `gender`: Character gender (string, required)
+- `image_url`: Character avatar URL (string, nullable)
+- `id_species`: Foreign key to Species table
+- `id_origin`: Foreign key to Origins table
+- `createdAt`: Timestamp (auto-generated)
+- `updatedAt`: Timestamp (auto-generated)
+
+**Species Table**:
+- `id`: Primary key (auto-increment)
+- `name`: Species name (string, required, unique)
+- `createdAt`: Timestamp (auto-generated)
+- `updatedAt`: Timestamp (auto-generated)
+
+**Origins Table**:
+- `id`: Primary key (auto-increment)
+- `name`: Origin name (string, required)
+- `url`: Original API URL (string, nullable)
+- `createdAt`: Timestamp (auto-generated)
+- `updatedAt`: Timestamp (auto-generated)
+
+#### Relationships
+
+```sql
+Characters.id_species -> Species.id (Many-to-One)
+Characters.id_origin -> Origins.id (Many-to-One)
+```
+
+#### GraphQL Type Definitions
+
+The GraphQL schema is automatically generated from TypeScript decorators:
+
+```typescript
+// Character GraphQL Type
+@ObjectType()
+export class CharacterType {
+  @Field(() => ID)
+  id: string;
+
+  @Field({ nullable: true })
+  name?: string;
+
+  @Field()
+  status: string;
+
+  @Field()
+  gender: string;
+
+  @Field({ nullable: true })
+  image_url?: string;
+
+  @Field(() => SpeciesType, { nullable: true })
+  species?: SpeciesType;
+
+  @Field(() => OriginType, { nullable: true })
+  origin?: OriginType;
+}
+```
 
 ## 📜 Available Scripts
 
@@ -293,7 +438,21 @@ The project follows **Domain-Driven Design (DDD)** principles with clear separat
 Characters
 ├── belongs_to Species (via id_species)
 └── belongs_to Origin (via id_origin)
+
+Species
+└── has_many Characters
+
+Origins
+└── has_many Characters
 ```
+
+### External API Integration
+
+The application integrates with the official Rick and Morty API:
+- **Source**: https://rickandmortyapi.com/
+- **Purpose**: Fetches character, species, and origin data
+- **Sync Method**: REST API calls during population
+- **Data Mapping**: Transforms external API data to local schema
 
 ## 🔍 Example Usage
 
@@ -350,7 +509,19 @@ docker-compose down
 docker-compose up -d
 
 # Check database logs
+docker-compose logs mysql
 docker-compose logs postgres
+```
+
+#### Empty Query Results
+If your GraphQL queries return empty arrays:
+
+```bash
+# 1. Ensure you've populated the database
+curl -X POST http://localhost:3000/characters
+
+# 2. Verify data was inserted by checking logs
+npm run start:dev
 ```
 
 #### GraphQL Schema Issues
@@ -389,9 +560,30 @@ npm run start:dev
 ### Debugging Tips
 
 1. **Check application logs** for detailed error messages
-2. **Use GraphQL Playground** to test queries interactively
-3. **Test basic queries** with the `findCharacters` query
-4. **Check Docker container status** with `docker-compose ps`
+2. **Use GraphQL Playground** to test queries interactively at http://localhost:3000/graphql
+3. **Populate database first** - Run `POST http://localhost:3000/characters` before testing
+4. **Test basic queries** with the `findCharacters` query
+5. **Check Docker container status** with `docker-compose ps`
+6. **Verify database connectivity** by checking container logs
+7. **Use curl to test REST endpoints** for data population
+
+### Quick Testing Checklist
+
+```bash
+# 1. Check if containers are running
+docker-compose ps
+
+# 2. Populate database with initial data
+curl -X POST http://localhost:3000/characters
+
+# 3. Test GraphQL query
+curl -X POST http://localhost:3000/graphql \
+  -H "Content-Type: application/json" \
+  -d '{"query": "{ findCharacters { id name status } }"}'
+
+# 4. Check application logs
+npm run start:dev
+```
 
 ## ⚙️ Configuration
 
@@ -400,13 +592,22 @@ npm run start:dev
 The application automatically configures itself for development. For production or custom setups, you can create a `.env` file:
 
 ```bash
-# Database Configuration
+# Database Configuration (MySQL - Primary)
 DB_HOST=localhost
-DB_PORT=5432
-DB_USERNAME=postgres
+DB_PORT=3306
+DB_USERNAME=user
 DB_PASSWORD=password
-DB_NAME=rickandmorty
+DB_NAME=rickandmortydb
+DB_TYPE=mysql
 DB_SYNCHRONIZE=true
+
+# Alternative PostgreSQL Configuration
+# DB_HOST=localhost
+# DB_PORT=5432
+# DB_USERNAME=user
+# DB_PASSWORD=password
+# DB_NAME=rickandmortydb
+# DB_TYPE=postgres
 
 # Application Configuration
 PORT=3000
@@ -415,25 +616,50 @@ NODE_ENV=development
 
 ### Database Schema
 
-The application uses Sequelize with auto-sync enabled in development mode. The schema includes:
+The application uses Sequelize ORM with auto-sync enabled in development mode. The schema includes:
 
 - **Characters** table with foreign keys to Species and Origins
-- **Species** table with unique species names
+- **Species** table with unique species names  
 - **Origins** table with origin names and URLs
 - Automatic timestamps (createdAt, updatedAt)
+- **MySQL** as the primary database (with PostgreSQL support)
+- **Redis** for caching (optional)
 
 ## 🛠️ Technologies Used
 
 | Technology | Purpose | Version |
 |------------|---------|---------|
-| **NestJS** | Backend framework | ^10.0.0 |
-| **GraphQL** | API query language | ^16.8.0 |
-| **Apollo Server** | GraphQL server | ^4.9.0 |
-| **TypeScript** | Type safety | ^5.1.3 |
-| **Sequelize** | ORM for database | ^6.32.1 |
-| **PostgreSQL** | Primary database | 15 |
+| **NestJS** | Backend framework | ^11.0.1 |
+| **GraphQL** | API query language | ^16.11.0 |
+| **Apollo Server** | GraphQL server | ^5.0.0 |
+| **TypeScript** | Type safety | ^5.7.3 |
+| **Sequelize** | ORM for database | ^6.37.7 |
+| **MySQL** | Primary database | 8.0 |
+| **PostgreSQL** | Alternative database | 14 |
+| **Redis** | Caching layer | 7 |
 | **Docker** | Containerization | - |
-| **Jest** | Testing framework | ^29.5.0 |
+| **Jest** | Testing framework | ^30.0.0 |
+| **Axios** | HTTP client | ^1.12.2 |
+| **Class Validator** | Input validation | ^0.14.2 |
+| **Joi** | Schema validation | ^18.0.1 |
+
+### Core Dependencies
+
+#### Production Dependencies
+- `@nestjs/core`, `@nestjs/common` - NestJS framework core
+- `@nestjs/graphql`, `@apollo/server` - GraphQL implementation
+- `@nestjs/sequelize`, `sequelize-typescript` - Database ORM
+- `@nestjs/config` - Configuration management
+- `mysql2` - MySQL database driver
+- `class-transformer`, `class-validator` - Data validation
+- `axios` - External API communication
+- `rxjs` - Reactive programming
+
+#### Development Dependencies
+- `@nestjs/cli` - NestJS command line interface
+- `eslint`, `prettier` - Code quality and formatting
+- `jest`, `@nestjs/testing` - Testing framework
+- `typescript`, `ts-node` - TypeScript support
 
 ## 📈 Performance Considerations
 

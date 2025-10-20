@@ -7,6 +7,6 @@ export class CharactersController {
 
   @Post()
   create() {
-    return this.charactersService.syncCharacters();
+    return this.charactersService.syncCharacters(15);
   }
 }

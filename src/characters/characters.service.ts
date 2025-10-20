@@ -19,6 +19,8 @@ export class CharactersService {
     private originModel: typeof Origin,
   ) { }
 
+  private readonly API_URL = 'https://rickandmortyapi.com/api/character';
+
   // Execute every 12 hours
   @Cron('0 0,12 * * *', {
     name: 'characters-sync',
@@ -32,9 +34,10 @@ export class CharactersService {
     console.log(`--- CRON JOB: end. synced: ${result.count} ---`);
   }
 
-  async syncCharacters(): Promise<{ message: string; count: number }> {
+  /* numberCharacter to first sync */
+  async syncCharacters(numberCharacters: number = 0): Promise<{ message: string; count: number }> {
     try {
-      let url = 'https://rickandmortyapi.com/api/character';
+      let url = this.API_URL;
       let totalSynced = 0;
 
       // Configure axios with better defaults
@@ -69,7 +72,6 @@ export class CharactersService {
             { returning: true }
           );
 
-          // Verificar que tenemos los IDs necesarios
           if (!species?.id || !origin?.id) {
             console.error(`Missing IDs for character ${character.id}: species=${species?.id}, origin=${origin?.id}`);
             continue;
@@ -87,9 +89,12 @@ export class CharactersService {
           });
 
           totalSynced++;
+          if ((numberCharacters > 0) && totalSynced === numberCharacters) break;
         }
 
+        if ((numberCharacters > 0) && totalSynced === numberCharacters) break;
         url = info.next || '';
+
       }
 
       return {
